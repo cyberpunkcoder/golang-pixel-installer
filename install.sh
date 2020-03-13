@@ -1,32 +1,67 @@
 #! /bin/bash
 
-# Author: cyberpunkprogrammer (github.com/cyberpunkprogrammer)
+# Author: cyberpunkprogrammer (github.com/cyberpunkprogrammer) (cyberpunkprogrammer@gmail.com)
 # Date: March 13, 2020
 
-# Exit if a command in the script fails.
-set -o errexit
+# Exit if a command if the script fails.
+set -e
 
+GOVERSION=1.14
 USERHOME=$HOME
+GOLIBRARY=/usr/lib/go
 GOPROGRAM=/usr/local/go
 GOHOME=$USERHOME/go
 PIXELHOME=$USERHOME/pixel
- 
+USERPROFILE=$USERHOME/.profile
+DOWNLOADURL=https://storage.googleapis.com/golang
+
+for i in $(seq 1 $END); do echo $i; done
+
 function installGo {
 	echo "Installing go."
 
-	apt update
+	# Check system architecture.
+	ARCH=$(uname -m)
+	case $ARCH in
+		"x86_64") ARCH=amd64 ;;
+    		"armv6") ARCH=armv6l ;;
+		"armv8") ARCH=arm64 ;;
+		.*386.*) ARCH=386 ;;
+	esac
 
-	go version
-	go env
+	# Check for latest version of go.
+	printf "Checking for latest version of go... "
+	while true
+	do
+		CHECKVERSION=$(bc <<< "$GOVERSION+0.01")
+
+		if [[ `wget -S --spider $DOWNLOADURL/go$CHECKVERSION.linux-$ARCH.tar.gz  2>&1 | grep 'HTTP/1.1 200 OK'` ]]
+		then
+			GOVERSION=$(bc <<< "$GOVERSION+0.01")
+		else
+			echo "Found version $GOVERSION"
+			break	
+		fi
+	done
+	
+	# TODO: Add wget installation.
+	
+	# TODO: Add profile additions.
+
+	#source $USERPROFILE
+	#go version	
+	#go env
 
 	echo "Go installation complete."
 }
 
 function uninstallGo {
-	rm -rf $GOHOME
+	rm -rf /usr/lib/go-*
 	rm -rf $GOPROGRAM
-	sed -i '/export PATH=$PATH:\/usr\/local\/go\/bin/d' .profile
-	sed -i '/export GOPATH=$HOME\/go/d' .profile
+	rm -rf $GOLIBRARY
+	rm -rf $GOHOME
+	sed -i '/export PATH=$PATH:\/usr\/local\/go\/bin/d' $USERPROFILE
+	sed -i '/export GOPATH=$HOME\/go/d' $USERPROFILE
 	
 	echo "Go uninstalled."
 }
@@ -77,5 +112,3 @@ else
 		;;
 	esac
 fi
-
-
