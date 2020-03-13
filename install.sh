@@ -15,8 +15,6 @@ PIXELHOME=$USERHOME/pixel
 USERPROFILE=$USERHOME/.profile
 DOWNLOADURL=https://storage.googleapis.com/golang
 
-for i in $(seq 1 $END); do echo $i; done
-
 function installGo {
 	echo "Installing go."
 
@@ -44,13 +42,20 @@ function installGo {
 		fi
 	done
 	
-	# TODO: Add wget installation.
+	# Download go.
+	echo "Downloading go."
+	wget -S $DOWNLOADURL/go$GOVERSION.linux-$ARCH.tar.gz
 	
+	# Install go.
+	echo "Unpacking files."
+	tar -C /usr/local -xzf go$GOVERSION.linux-$ARCH.tar.gz
+
 	# TODO: Add profile additions.
 
-	#source $USERPROFILE
-	#go version	
-	#go env
+	source $USERPROFILE
+	sleep 5
+	go version	
+	go env
 
 	echo "Go installation complete."
 }
@@ -75,16 +80,14 @@ function uninstallPixel {
 	echo "Pixel uninstalled."
 }
 
-# Check for previous pixel installations.
-if [ -d $PIXELHOME ]
-then
-	read -r -p "Pixel installation found, would you like to remove it? [y/N] " response
-        case "$response" in
-                [yY][eE][sS]|[yY])
-                	uninstallPixel
+function pixelPrompt {
+	read -r -p "Would you like to install Pixel? [y/N] " response
+	case "$response" in
+		[yY][eE][sS]|[yY])
+			installPixel
 		;;
-        esac
-fi
+	esac	
+}
 
 # Check for previous go installations.
 if [ -d $GOPROGRAM ] || [ -d $GOHOME ]
@@ -104,10 +107,28 @@ then
 	esac
 else
 	installGo
+fi
 
+# Check for previous pixel installations.
+if [ -d $PIXELHOME ]
+then
+	read -r -p "Pixel installation found, would you like to remove it? [y/N] " response
+	case "$response" in
+		[yY][eE][sS]|[yY])
+			uninstallPixel
+			
+			read -r -p "Would you like to reinstall Pixel? [y/N] " response
+			case "$response" in
+				[yY][eE][sS]|[yY])
+				installPixel
+				;;
+			esac
+		;;
+	esac
+else
 	read -r -p "Would you like to install Pixel? [y/N] " response
-     		case "$response" in
- 			[yY][eE][sS]|[yY])
+	case "$response" in
+		[yY][eE][sS]|[yY])
 			installPixel
 		;;
 	esac
