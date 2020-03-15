@@ -7,12 +7,11 @@
 set -e
 
 GOVERSION=1.14
-USERHOME=$HOME
 GOLIBRARY=/usr/lib/go
 GOPROGRAM=/usr/local/go
-GOHOME=$USERHOME/go
-PIXELHOME=$USERHOME/pixel
-USERPROFILE=$USERHOME/.profile
+GOHOME=$HOME/go
+PIXELHOME=$HOME/pixel
+USERPROFILE=$HOME/.profile
 DOWNLOADURL=https://storage.googleapis.com/golang
 
 function installGo {
@@ -43,19 +42,20 @@ function installGo {
 	done
 	
 	# Download go.
-	echo "Downloading go."
+	echo "Downloading go"
 	wget -S $DOWNLOADURL/go$GOVERSION.linux-$ARCH.tar.gz
 	
 	# Install go.
-	echo "Unpacking files."
+	echo "Unpacking files"
 	tar -C /usr/local -xzf go$GOVERSION.linux-$ARCH.tar.gz
 
-	# TODO: Add profile additions.
-
+	# Remove tar file.
+	rm -rf go$GOVERSION.linux-$ARCH.tar.gz*
+	
+	#Add profile additions.
+	grep -qxF 'export PATH=$PATH:/usr/local/go/bin' $USERPROFILE || echo 'export PATH=$PATH:/usr/local/go/bin' >> $USERPROFILE
+	grep -qxF 'export GOPATH=$HOME/go' $USERPROFILE || echo 'export GOPATH=$HOME/go' >> $USERPROFILE
 	source $USERPROFILE
-	sleep 5
-	go version	
-	go env
 
 	echo "Go installation complete."
 }
@@ -68,16 +68,16 @@ function uninstallGo {
 	sed -i '/export PATH=$PATH:\/usr\/local\/go\/bin/d' $USERPROFILE
 	sed -i '/export GOPATH=$HOME\/go/d' $USERPROFILE
 	
-	echo "Go uninstalled."
+	echo "Go uninstalled"
 }
 
 function installPixel {
-	echo "Installing pixel."
+	echo "Installing pixel"
 }
 
 function uninstallPixel {
 	rm -rf $PIXELHOME
-	echo "Pixel uninstalled."
+	echo "Pixel uninstalled"
 }
 
 function pixelPrompt {
@@ -88,6 +88,12 @@ function pixelPrompt {
 		;;
 	esac	
 }
+
+# Check to make sure script has admin privilidges.
+if [[ $EUID -ne 0 ]]; then
+	echo "You must run this script with root access, ( try sudo ./install )"
+   exit 1
+fi
 
 # Check for previous go installations.
 if [ -d $GOPROGRAM ] || [ -d $GOHOME ]
@@ -120,7 +126,7 @@ then
 			read -r -p "Would you like to reinstall Pixel? [y/N] " response
 			case "$response" in
 				[yY][eE][sS]|[yY])
-				installPixel
+					installPixel
 				;;
 			esac
 		;;
