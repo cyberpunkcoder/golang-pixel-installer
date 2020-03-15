@@ -1,7 +1,21 @@
-# Golang Pixel Installer
-Bash script to install golang and/or pixel on Ubuntu.
+# Golang Pixel Installer #
 
-Run the script: ```./install``` to install/remove the go language and the pixel game engine.
+Bash script to install golang and/or pixel on Ubuntu.
+(Tested on Ubuntu 19.10, March 15 2020)
+
+## Install ##
+
+Run the script: ```sudo ./install``` to install/remove the go language and the pixel game engine.
 
 You will be prompted if you wish to remove previous installations.
 
+
+## How It Works ##
+
+Previous installations of go and pixel are removed from you syste if desired.
+Script checks for the latest version of go and installs if from the official google api location.
+Pixel game engine and all prerequisites are installed from the official creator's github.
+
+## Credit ##
+
+[Official Pixel Game Engine Repo](https://github.com/faiface/pixel "faiface/pixel")
