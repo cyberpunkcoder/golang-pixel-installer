@@ -12,10 +12,11 @@ You will be prompted if you wish to remove previous installations.
 
 ## How It Works ##
 
-Previous installations of go and pixel are removed from you syste if desired.
+Previous installations of go and pixel are removed from you system if desired.
 Script checks for the latest version of go and installs if from the official google api location.
 Pixel game engine and all prerequisites are installed from the official creator's github.
 
 ## Credit ##
 
-[Official Pixel Game Engine Repo](https://github.com/faiface/pixel "faiface/pixel")
+[Official Golang Website](https://golang.org/ "golang.org")
+[Official Pixel Game Engine Repo](https://github.com/faiface/pixel "github.com/faiface/pixel")
