@@ -18,5 +18,5 @@ Pixel game engine and all prerequisites are installed from the official creator'
 
 ## Credit ##
 
-[Official Golang Website](https://golang.org/ "golang.org")
+[Official Golang Website](https://golang.org/ "golang.org") | 
 [Official Pixel Game Engine Repo](https://github.com/faiface/pixel "github.com/faiface/pixel")
