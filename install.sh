@@ -9,14 +9,13 @@ set -e
 GOVERSION=1.14
 GOLIBRARY=/usr/lib/go
 GOPROGRAM=/usr/local/go
-GOHOME=$HOME/go
-PIXELHOME=$HOME/pixel
-USERPROFILE=$HOME/.profile
+USERHOME=$(eval echo ~${SUDO_USER})
+GOHOME=$USERHOME/go
+PIXELHOME=$USERHOME/pixel
+USERPROFILE=$USERHOME/.profile
 DOWNLOADURL=https://storage.googleapis.com/golang
 
 function installGo {
-	echo "Installing go."
-
 	# Check system architecture.
 	ARCH=$(uname -m)
 	case $ARCH in
@@ -46,7 +45,7 @@ function installGo {
 	wget -S $DOWNLOADURL/go$GOVERSION.linux-$ARCH.tar.gz
 	
 	# Install go.
-	echo "Unpacking files"
+	echo "Installing go"
 	tar -C /usr/local -xzf go$GOVERSION.linux-$ARCH.tar.gz
 
 	# Remove tar file.
@@ -72,12 +71,43 @@ function uninstallGo {
 }
 
 function installPixel {
+	echo "Installing pixel prerequisites"
+	
+	apt install libgl1-mesa-dev
+	apt install xorg-dev
+	
+	echo "Downloading pixell"
+
+	git clone https://github.com/faiface/pixel.git $PIXELHOME
+	
 	echo "Installing pixel"
+	
+	cd $PIXELHOME
+	go install ./...
+
+	echo "Pixel installed"
+
+	read -r -p "Would you like to install pixel game examples? [y/N] " response
+                        case "$response" in
+                                [yY][eE][sS]|[yY])
+                                        installPixelExamples
+                                ;;
+                        esac
 }
 
 function uninstallPixel {
 	rm -rf $PIXELHOME
+	uninstallPixelExamples
 	echo "Pixel uninstalled"
+}
+
+function installPixelExamples {
+	git clone https://github.com/faiface/pixel-examples.git $USERHOME/pixel-examples
+	go run $USERHOME/pixel-examples/platformer/main.go
+}
+
+function uninstallPixelExamples {
+	rm -rf $USERHOME/pixel-examples
 }
 
 function pixelPrompt {
