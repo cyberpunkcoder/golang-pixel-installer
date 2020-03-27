@@ -11,9 +11,11 @@ GOLIBRARY=/usr/lib/go
 GOPROGRAM=/usr/local/go
 USERHOME=$(eval echo ~${SUDO_USER})
 GOHOME=$USERHOME/go
-PIXELHOME=$USERHOME/pixel
+PIXELHOME=$GOHOME/pixel
 USERPROFILE=$USERHOME/.profile
 DOWNLOADURL=https://storage.googleapis.com/golang
+
+echo $USERPROFILE
 
 function installGo {
 	# Check system architecture.
@@ -36,25 +38,26 @@ function installGo {
 			GOVERSION=$(bc <<< "$GOVERSION+0.01")
 		else
 			echo "Found version $GOVERSION"
-			break	
+			break
 		fi
 	done
-	
+
 	# Download go.
 	echo "Downloading go"
-	wget -S $DOWNLOADURL/go$GOVERSION.linux-$ARCH.tar.gz
-	
+	wget $DOWNLOADURL/go$GOVERSION.linux-$ARCH.tar.gz -q --show-progress
+
 	# Install go.
 	echo "Installing go"
 	tar -C /usr/local -xzf go$GOVERSION.linux-$ARCH.tar.gz
 
 	# Remove tar file.
 	rm -rf go$GOVERSION.linux-$ARCH.tar.gz*
-	
+
 	#Add profile additions.
 	grep -qxF 'export PATH=$PATH:/usr/local/go/bin' $USERPROFILE || echo 'export PATH=$PATH:/usr/local/go/bin' >> $USERPROFILE
 	grep -qxF 'export GOPATH=$HOME/go' $USERPROFILE || echo 'export GOPATH=$HOME/go' >> $USERPROFILE
-	source $USERPROFILE
+
+	mkdir $GOHOME
 
 	echo "Go installation complete."
 }
@@ -66,24 +69,40 @@ function uninstallGo {
 	rm -rf $GOHOME
 	sed -i '/export PATH=$PATH:\/usr\/local\/go\/bin/d' $USERPROFILE
 	sed -i '/export GOPATH=$HOME\/go/d' $USERPROFILE
-	
+
 	echo "Go uninstalled"
 }
 
 function installPixel {
 	echo "Installing pixel prerequisites"
-	
+
 	apt install libgl1-mesa-dev
 	apt install xorg-dev
-	
-	echo "Downloading pixell"
+	sudo apt install mesa-utils
 
-	git clone https://github.com/faiface/pixel.git $PIXELHOME
-	
-	echo "Installing pixel"
-	
-	cd $PIXELHOME
-	go install ./...
+	echo "Checking system requirements"
+
+	glver=$(glxinfo | grep 'OpenGL version string:' | sed 's/.*://')
+	glver=$(echo $glver | sed 's/\s.*$//')
+
+	if(( $(echo "$glver < 3.3" | bc -l) ));
+	then
+		read -r -p "OpenGL version is earlier than 3.3 and pixel may not work, abort? [y/N] " response
+			case "$response" in
+				[yY][eE][sS]|[yY])
+					return
+				;;
+			esac
+	fi
+
+	echo "Downloading pixel"
+
+	export PATH=$PATH:/usr/local/go/bin
+	export GOPATH=$GOHOME
+
+	go get github.com/faiface/pixel
+	go get github.com/faiface/glhf
+	go get github.com/go-gl/glfw/v3.2/glfw
 
 	echo "Pixel installed"
 
@@ -103,7 +122,7 @@ function uninstallPixel {
 
 function installPixelExamples {
 	git clone https://github.com/faiface/pixel-examples.git $USERHOME/pixel-examples
-	go run $USERHOME/pixel-examples/platformer/main.go
+	cd $USERHOME/pixel-examples/platformer && go run main.go
 }
 
 function uninstallPixelExamples {
@@ -116,7 +135,7 @@ function pixelPrompt {
 		[yY][eE][sS]|[yY])
 			installPixel
 		;;
-	esac	
+	esac
 }
 
 # Check to make sure script has admin privilidges.
@@ -132,7 +151,7 @@ then
 	case "$response" in
 		[yY][eE][sS]|[yY])
 			uninstallGo
-			
+
 			read -r -p "Would you like to reinstall go? [y/N] " response
 		 	case "$response" in
 				[yY][eE][sS]|[yY])
@@ -152,7 +171,7 @@ then
 	case "$response" in
 		[yY][eE][sS]|[yY])
 			uninstallPixel
-			
+
 			read -r -p "Would you like to reinstall Pixel? [y/N] " response
 			case "$response" in
 				[yY][eE][sS]|[yY])
