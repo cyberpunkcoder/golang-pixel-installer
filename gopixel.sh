@@ -11,11 +11,22 @@ GOLIBRARY=/usr/lib/go
 GOPROGRAM=/usr/local/go
 USERHOME=$(eval echo ~${SUDO_USER})
 GOHOME=$USERHOME/go
-PIXELHOME=$GOHOME/pixel
+PIXELHOME=$GOHOME/src/github.com/faiface
 USERPROFILE=$USERHOME/.profile
 DOWNLOADURL=https://storage.googleapis.com/golang
+INSTALL=false
+UNINSTALL=false
 
-echo $USERPROFILE
+# Flags to no propt install or uninstall.
+if [ "$1" == "-i" ];
+then
+	echo "Auto install"
+	INSTALL=true
+elif [ "$1" == "-u" ]; 
+then
+	echo "Auto uninstall"
+	UNINSTALL=true
+fi
 
 function installGo {
 	# Check system architecture.
@@ -48,6 +59,7 @@ function installGo {
 
 	# Install go.
 	echo "Installing go"
+	mkdir $GOHOME
 	tar -C /usr/local -xzf go$GOVERSION.linux-$ARCH.tar.gz
 
 	# Remove tar file.
@@ -56,8 +68,6 @@ function installGo {
 	#Add profile additions.
 	grep -qxF 'export PATH=$PATH:/usr/local/go/bin' $USERPROFILE || echo 'export PATH=$PATH:/usr/local/go/bin' >> $USERPROFILE
 	grep -qxF 'export GOPATH=$HOME/go' $USERPROFILE || echo 'export GOPATH=$HOME/go' >> $USERPROFILE
-
-	mkdir $GOHOME
 
 	echo "Go installation complete."
 }
@@ -76,66 +86,64 @@ function uninstallGo {
 function installPixel {
 	echo "Installing pixel prerequisites"
 
-	apt install libgl1-mesa-dev
 	apt install xorg-dev
 	sudo apt install mesa-utils
-
-	echo "Checking system requirements"
-
-	glver=$(glxinfo | grep 'OpenGL version string:' | sed 's/.*://')
-	glver=$(echo $glver | sed 's/\s.*$//')
-
-	if(( $(echo "$glver < 3.3" | bc -l) ));
-	then
-		read -r -p "OpenGL version is earlier than 3.3 and pixel may not work, abort? [y/N] " response
-			case "$response" in
-				[yY][eE][sS]|[yY])
-					return
-				;;
-			esac
-	fi
 
 	echo "Downloading pixel"
 
 	export PATH=$PATH:/usr/local/go/bin
 	export GOPATH=$GOHOME
 
-	go get github.com/faiface/pixel
-	go get github.com/faiface/glhf
-	go get github.com/go-gl/glfw/v3.2/glfw
+	go get github.com/faiface/pixel 2> /dev/null
+	go get github.com/faiface/glhf 2> /dev/null
+	go get github.com/go-gl/glfw/v3.2/glfw 2> /dev/null
 
 	echo "Pixel installed"
 
-	read -r -p "Would you like to install pixel game examples? [y/N] " response
-                        case "$response" in
-                                [yY][eE][sS]|[yY])
-                                        installPixelExamples
+	if ($INSTALL)
+	then
+		installPixelExamples
+	else
+		read -r -p "Would you like to install pixel game examples? [y/N] " response
+        		case "$response" in
+				[yY][eE][sS]|[yY])
+					installPixelExamples
                                 ;;
                         esac
+	fi
+
+	echo "IMPORTANT: To run any pixel games, restart your machine or type 'source \$HOME/.profile'"
 }
 
 function uninstallPixel {
 	rm -rf $PIXELHOME
-	uninstallPixelExamples
 	echo "Pixel uninstalled"
+
+	if [ -d $USERHOME/pixel-examples ]
+	then
+		uninstallPixelExamples
+	fi
 }
 
 function installPixelExamples {
 	git clone https://github.com/faiface/pixel-examples.git $USERHOME/pixel-examples
-	cd $USERHOME/pixel-examples/platformer && go run main.go
+	
+	if ($INSTALL)
+	then
+		cd $USERHOME/pixel-examples/platformer && go run main.go
+	else
+		read -r -p "Would you like to run a pixel example? [y/N] " response
+                	case "$response" in
+                        	[yY][eE][sS]|[yY])
+                                	cd $USERHOME/pixel-examples/platformer && go run main.go
+				;;
+                        esac
+	fi
 }
 
 function uninstallPixelExamples {
 	rm -rf $USERHOME/pixel-examples
-}
-
-function pixelPrompt {
-	read -r -p "Would you like to install Pixel? [y/N] " response
-	case "$response" in
-		[yY][eE][sS]|[yY])
-			installPixel
-		;;
-	esac
+	echo "Pixel examples uninstalled"
 }
 
 # Check to make sure script has admin privilidges.
@@ -145,46 +153,69 @@ if [[ $EUID -ne 0 ]]; then
 fi
 
 # Check for previous go installations.
-if [ -d $GOPROGRAM ] || [ -d $GOHOME ]
+if ($UNINSTALL)
 then
-	read -r -p "Go installation found, would you like to remove it? [y/N] " response
-	case "$response" in
-		[yY][eE][sS]|[yY])
-			uninstallGo
-
-			read -r -p "Would you like to reinstall go? [y/N] " response
-		 	case "$response" in
-				[yY][eE][sS]|[yY])
-			 		installGo
-				;;
-		 	esac
-		;;
-	esac
-else
+	uninstallGo
+elif ($INSTALL)
+then
+	if [ -d $GOPROGRAM ] || [ -d $GOHOME ]
+	then
+		uninstallGo
+	fi
 	installGo
+else
+	if [ -d $GOPROGRAM ] || [ -d $GOHOME ]
+	then
+		read -r -p "Go installation found, would you like to remove it? [y/N] " response
+		case "$response" in
+			[yY][eE][sS]|[yY])
+				uninstallGo
+				read -r -p "Would you like to reinstall go? [y/N] " response
+		 		case "$response" in
+					[yY][eE][sS]|[yY])
+		 				installGo
+					;;
+	 			esac
+			;;
+		esac
+	else
+		installGo
+	fi
 fi
 
 # Check for previous pixel installations.
-if [ -d $PIXELHOME ]
+if ($UNINSTALL)
 then
-	read -r -p "Pixel installation found, would you like to remove it? [y/N] " response
-	case "$response" in
-		[yY][eE][sS]|[yY])
-			uninstallPixel
-
-			read -r -p "Would you like to reinstall Pixel? [y/N] " response
-			case "$response" in
-				[yY][eE][sS]|[yY])
-					installPixel
-				;;
-			esac
-		;;
-	esac
+	uninstallPixel
+elif ($INSTALL)
+then
+	if [ -d $PIXELHOME ]
+	then
+		uninstallPixel
+	fi
+	installPixel
 else
-	read -r -p "Would you like to install Pixel? [y/N] " response
-	case "$response" in
-		[yY][eE][sS]|[yY])
-			installPixel
-		;;
-	esac
+	if [ -d $PIXELHOME ]
+	then
+		read -r -p "Pixel installation found, would you like to remove it? [y/N] " response
+		case "$response" in
+			[yY][eE][sS]|[yY])
+				uninstallPixel
+
+				read -r -p "Would you like to reinstall pixel? [y/N] " response
+				case "$response" in
+					[yY][eE][sS]|[yY])
+						installPixel
+					;;
+				esac
+			;;
+		esac
+	else
+		read -r -p "Would you like to reinstall pixel? [y/N] " response
+                case "$response" in
+                	[yY][eE][sS]|[yY])
+                        	installPixel
+                        ;;
+              	esac
+	fi
 fi
