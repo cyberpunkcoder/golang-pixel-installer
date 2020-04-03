@@ -1,4 +1,4 @@
-![gopixel](img/gopixel.png) # Golang Pixel Installer #
+![gopixel](img/gopixel.png)
 
 Bash script to install golang and/or pixel game engine on Ubuntu.
 (Tested on Ubuntu 19.10, March 29 2020)
