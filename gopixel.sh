@@ -148,7 +148,7 @@ function uninstallPixelExamples {
 
 # Check to make sure script has admin privilidges.
 if [[ $EUID -ne 0 ]]; then
-	echo "You must run this script with root access, ( try sudo ./install )"
+	echo "You must run this script with root access, try 'sudo ./gopixel.sh'"
    exit 1
 fi
 
