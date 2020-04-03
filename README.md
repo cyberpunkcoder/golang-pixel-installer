@@ -18,7 +18,7 @@ Alternatively, you can run ```sudo ./gopixel.sh -u``` to auto-uninstall without 
 ## How It Works ##
 
 Previous installations of go and pixel are removed from you system if desired.
-Script checks for the latest version of go and installs if from the official google api location.
+Script checks for the latest version of go and installs from the official google api location.
 Pixel game engine and all prerequisites are installed from the official creator's github.
 
 ## Credit ##
