@@ -9,7 +9,7 @@ set -e
 GOVERSION=1.14
 GOLIBRARY=/usr/lib/go
 GOPROGRAM=/usr/local/go
-USERHOME=$(eval echo ~${SUDO_USER})
+USERHOME=/home/$SUDO_USER
 GOHOME=$USERHOME/go
 PIXELHOME=$GOHOME/src/github.com/faiface
 USERPROFILE=$USERHOME/.profile
@@ -33,7 +33,7 @@ function installGo {
 	ARCH=$(uname -m)
 	case $ARCH in
 		"x86_64") ARCH=amd64 ;;
-    		"armv6") ARCH=armv6l ;;
+			"armv6") ARCH=armv6l ;;
 		"armv8") ARCH=arm64 ;;
 		.*386.*) ARCH=386 ;;
 	esac
@@ -79,7 +79,6 @@ function uninstallGo {
 	rm -rf $GOHOME
 	sed -i '/export PATH=$PATH:\/usr\/local\/go\/bin/d' $USERPROFILE
 	sed -i '/export GOPATH=$HOME\/go/d' $USERPROFILE
-
 	echo "Go uninstalled"
 }
 
@@ -94,22 +93,22 @@ function installPixel {
 	export PATH=$PATH:/usr/local/go/bin
 	export GOPATH=$GOHOME
 
-	go get github.com/faiface/pixel 2> /dev/null
-	go get github.com/faiface/glhf 2> /dev/null
-	go get github.com/go-gl/glfw/v3.2/glfw 2> /dev/null
+	go get github.com/faiface/pixel
+	go get github.com/faiface/glhf
+	go get github.com/go-gl/glfw/v3.2/glfw
 
 	echo "Pixel installed"
 
-	if ($INSTALL)
+	if [ $INSTALL == true ]
 	then
 		installPixelExamples
 	else
 		read -r -p "Would you like to install pixel game examples? [y/N] " response
-        		case "$response" in
+			case "$response" in
 				[yY][eE][sS]|[yY])
 					installPixelExamples
-                                ;;
-                        esac
+				;;
+			esac
 	fi
 
 	echo "IMPORTANT: To run any pixel games, restart your machine or type 'source \$HOME/.profile'"
@@ -127,17 +126,17 @@ function uninstallPixel {
 
 function installPixelExamples {
 	git clone https://github.com/faiface/pixel-examples.git $USERHOME/pixel-examples
-	
-	if ($INSTALL)
+
+	if [ $INSTALL == true ]
 	then
 		cd $USERHOME/pixel-examples/platformer && go run main.go
 	else
 		read -r -p "Would you like to run a pixel example? [y/N] " response
-                	case "$response" in
-                        	[yY][eE][sS]|[yY])
-                                	cd $USERHOME/pixel-examples/platformer && go run main.go
+			case "$response" in
+				[yY][eE][sS]|[yY])
+					cd $USERHOME/pixel-examples/platformer && go run main.go
 				;;
-                        esac
+			esac
 	fi
 }
 
@@ -149,21 +148,22 @@ function uninstallPixelExamples {
 # Check to make sure script has root access.
 if [[ $EUID -ne 0 ]]; then
 	echo "You must run this script with root access, try 'sudo ./gopixel.sh'"
-   exit 1
+	exit 1
 fi
 
-# Check for previous go installations.
-if ($UNINSTALL)
+if [ $UNINSTALL == true ]
 then
 	uninstallGo
-elif ($INSTALL)
+elif [ $INSTALL == true ]
 then
+	# Check for previous go installations
 	if [ -d $GOPROGRAM ] || [ -d $GOHOME ]
 	then
 		uninstallGo
 	fi
 	installGo
 else
+	# Check for previous go installations
 	if [ -d $GOPROGRAM ] || [ -d $GOHOME ]
 	then
 		read -r -p "Go installation found, would you like to remove it? [y/N] " response
@@ -171,11 +171,11 @@ else
 			[yY][eE][sS]|[yY])
 				uninstallGo
 				read -r -p "Would you like to reinstall go? [y/N] " response
-		 		case "$response" in
+				case "$response" in
 					[yY][eE][sS]|[yY])
-		 				installGo
+						installGo
 					;;
-	 			esac
+				esac
 			;;
 		esac
 	else
@@ -183,12 +183,12 @@ else
 	fi
 fi
 
-# Check for previous pixel installations.
-if ($UNINSTALL)
+if [ $UNINSTALL == true ]
 then
 	uninstallPixel
-elif ($INSTALL)
+elif [ $INSTALL == true ]
 then
+	# Check for previous pixel installations
 	if [ -d $PIXELHOME ]
 	then
 		uninstallPixel
@@ -211,11 +211,11 @@ else
 			;;
 		esac
 	else
-		read -r -p "Would you like to reinstall pixel? [y/N] " response
-                case "$response" in
-                	[yY][eE][sS]|[yY])
-                        	installPixel
-                        ;;
-              	esac
+		read -r -p "Would you like to install pixel? [y/N] " response
+			case "$response" in
+				[yY][eE][sS]|[yY])
+					installPixel
+				;;
+			esac
 	fi
 fi
