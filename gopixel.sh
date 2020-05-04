@@ -22,7 +22,7 @@ if [ "$1" == "-i" ];
 then
 	echo "Auto install"
 	INSTALL=true
-elif [ "$1" == "-u" ]; 
+elif [ "$1" == "-u" ];
 then
 	echo "Auto uninstall"
 	UNINSTALL=true
@@ -59,7 +59,7 @@ function installGo {
 
 	# Install go.
 	echo "Installing go"
-	mkdir $GOHOME
+	sudo -u $SUDO_USER mkdir $GOHOME
 	tar -C /usr/local -xzf go$GOVERSION.linux-$ARCH.tar.gz
 
 	# Remove tar file.
