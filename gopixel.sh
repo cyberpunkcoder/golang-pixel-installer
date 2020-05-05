@@ -17,7 +17,7 @@ DOWNLOADURL=https://storage.googleapis.com/golang
 INSTALL=false
 UNINSTALL=false
 
-# Flags to no propt install or uninstall.
+# Flags to no propt install or uninstall
 if [ "$1" == "-i" ];
 then
 	echo "Auto install"
@@ -29,7 +29,7 @@ then
 fi
 
 function installGo {
-	# Check system architecture.
+	# Check system architecture
 	ARCH=$(uname -m)
 	case $ARCH in
 		"x86_64") ARCH=amd64 ;;
@@ -38,7 +38,7 @@ function installGo {
 		.*386.*) ARCH=386 ;;
 	esac
 
-	# Check for latest version of go.
+	# Check for latest version of go
 	printf "Checking for latest version of go... "
 	while true
 	do
@@ -53,23 +53,23 @@ function installGo {
 		fi
 	done
 
-	# Download go.
+	# Download go
 	echo "Downloading go"
 	wget $DOWNLOADURL/go$GOVERSION.linux-$ARCH.tar.gz -q --show-progress
 
-	# Install go.
+	# Install go
 	echo "Installing go"
 	sudo -u $SUDO_USER mkdir $GOHOME
 	tar -C /usr/local -xzf go$GOVERSION.linux-$ARCH.tar.gz
 
-	# Remove tar file.
+	# Remove tar file
 	rm -rf go$GOVERSION.linux-$ARCH.tar.gz*
 
-	#Add profile additions.
+	#Add profile additions
 	grep -qxF 'export PATH=$PATH:/usr/local/go/bin' $USERPROFILE || echo 'export PATH=$PATH:/usr/local/go/bin' >> $USERPROFILE
 	grep -qxF 'export GOPATH=$HOME/go' $USERPROFILE || echo 'export GOPATH=$HOME/go' >> $USERPROFILE
 
-	echo "Go installation complete."
+	echo "Go installation complete"
 }
 
 function uninstallGo {
@@ -145,7 +145,7 @@ function uninstallPixelExamples {
 	echo "Pixel examples uninstalled"
 }
 
-# Check to make sure script has root access.
+# Check to make sure script has root access
 if [[ $EUID -ne 0 ]]; then
 	echo "You must run this script with root access, try 'sudo ./gopixel.sh'"
 	exit 1
