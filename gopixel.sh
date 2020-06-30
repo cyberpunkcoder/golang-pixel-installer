@@ -67,7 +67,7 @@ function installGo {
 
 	#Add profile additions
 	grep -qxF 'export PATH=$PATH:/usr/local/go/bin' $USERPROFILE || echo 'export PATH=$PATH:/usr/local/go/bin' >> $USERPROFILE
-	grep -qxF 'export GOPATH=$HOME/go' $USERPROFILE || echo 'export GOPATH=$HOME/go' >> $USERPROFILE
+	grep -qxF "export GOPATH=$GOHOME" $USERPROFILE || echo "export GOPATH=$GOHOME" >> $USERPROFILE
 
 	echo "Go installation complete"
 }
