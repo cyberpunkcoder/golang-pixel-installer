@@ -13,7 +13,7 @@ You will be prompted if you wish to remove any previous installations.
 ## Uninstall ##
 
 Run the script ```sudo ./gopixel.sh``` to be prompted to uninstall golang and the pixel game engine.
-Alternatively, you can run ```sudo ./gopixel.sh -u``` to auto-uninstall without being prompted.
+You can run ```sudo ./gopixel.sh -u``` to auto-uninstall without being prompted.
 
 ## How It Works ##
 
