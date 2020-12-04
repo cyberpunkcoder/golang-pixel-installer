@@ -1,6 +1,6 @@
 #! /bin/bash
 
-# Author: cyberpunkprogrammer (github.com/cyberpunkprogrammer) (cyberpunkprogrammer@gmail.com)
+# Author: cyberpunkcoder (github.com/cyberpunkcoder) (cyberpunkcoder@gmail.com)
 # Date: March 13, 2020
 
 # Exit if a command if the script fails.
